@@ -1,15 +1,15 @@
 .card {
+  padding: 40px;
   font-size: 1rem;
-  background-color: rgb(152, 193, 212);
+  background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+  border: 2px solid lightblue;
   border-radius: 25px;
   color: white;
   display: grid;
 }
 
 .card__portrait {
-  border-top-left-radius: 25px;
-  border-top-right-radius: 25px;
-  width: 50vw;
+  border-radius: 25px;
   object-fit: cover;
 }
 
@@ -31,4 +31,11 @@
 .info__origin {
   font-size: 1rem;
   padding-left: 20px;
+}
+
+.container {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  justify-content: center;
 }
