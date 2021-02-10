@@ -3,6 +3,7 @@ export type APICharacter = {
   name: string;
   status: "Alive" | "Dead" | "unknown";
   species: string;
+  type: string;
   gender: "Female" | "Male" | "Genderless" | "unknown";
   origin: {
     name: string;
@@ -28,28 +29,63 @@ export type APICharacters = {
   results: APICharacter[];
 };
 
+export type Character = {
+  imgSrc: string;
+  name: string;
+  status: "Alive" | "Dead" | "unknown";
+  species: string;
+  origin: {
+    name: string;
+  };
+};
+
+function convertToCharacter(apiCharacter: APICharacter): Character {
+  return {
+    imgSrc: apiCharacter.image,
+    name: apiCharacter.name,
+    status: apiCharacter.status,
+    species: apiCharacter.species,
+    origin: {
+      name: apiCharacter.origin.name,
+    },
+  };
+}
+
 export async function getCharacter(id: number) {
   const response = await fetch(
     `https://rickandmortyapi.com/api/character/${id}`
   );
+  if (!response.ok) {
+    const result = await response.json();
+    return {
+      imgSrc: "",
+      name: result.error,
+      status: "Dead",
+      species: "Human",
+      origin: {
+        name: "Internet",
+      },
+    };
+  }
   const result = (await response.json()) as APICharacter;
-  const character = {
-    imgSrc: result.image,
-    name: result.name,
-    status: result.status,
-    origin: { name: result.origin.name },
-  };
+  const character = convertToCharacter(result);
   return character;
 }
 
-export async function getCharacters() {
-  const response = await fetch(`https://rickandmortyapi.com/api/character/`);
+export async function getCharacters(name?: string) {
+  const response = await fetch(
+    `https://rickandmortyapi.com/api/character/${name ? `?name=${name}` : ""}`
+  );
+  if (!response.ok) {
+    return [];
+  }
   const result = (await response.json()) as APICharacters;
-  const characters = result.results.map((apiCharacter) => ({
-    imgSrc: apiCharacter.image,
-    name: apiCharacter.name,
-    status: apiCharacter.status,
-    origin: { name: apiCharacter.origin.name },
-  }));
+  const characters = result.results.map((apiCharacter) =>
+    convertToCharacter(apiCharacter)
+  );
   return characters;
+}
+
+export function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }

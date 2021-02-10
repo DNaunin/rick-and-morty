@@ -1,7 +1,8 @@
 import "./card.css";
 import { createCard } from "./card";
 import { createElement } from "../../utils/createElement";
-import { getCharacter, getCharacters } from "../../utils/api";
+import { Character, getCharacter, getCharacters } from "../../utils/api";
+import { getRandomArbitrary } from "../../utils/api";
 
 export default {
   title: "Components/CharacterCards",
@@ -36,7 +37,7 @@ export const Summer = () =>
   });
 
 export const allCards = () => {
-  const characters = [
+  const characters: Character[] = [
     {
       imgSrc: "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
       name: "Rick Sanchez",
@@ -70,17 +71,52 @@ export const allCards = () => {
   return container;
 };
 
-export const CharacterFromAPI = (args, { loaded: { character } }) => {
-  return createCard(character);
+type CharactersFromAPI = {
+  loaded: {
+    characters: Character[];
+  };
+};
+export const CharactersFromAPIWithFilter = (
+  args,
+  { loaded: { characters } }
+) => {
+  const input = createElement("input", {
+    onchange: async () => {
+      const newCharacters = await getCharacters(input.value);
+      const newCards = newCharacters.map((character) => createCard(character));
+      characterContainer.innerHTML = "";
+      characterContainer.append(...newCards);
+    },
+  });
+
+  const characterContainer = createElement("div", {
+    className: "container",
+    childs: characters.map((character) => createCard(character)),
+  });
+
+  const container = createElement("div", {
+    className: "",
+    childs: [input, characterContainer],
+  });
+
+  return container;
 };
 
-CharacterFromAPI.loaders = [
+CharactersFromAPIWithFilter.loaders = [
   async () => ({
-    character: await getCharacter(666),
+    characters: await getCharacters(),
   }),
 ];
 
-export const CharactersFromAPI = (args, { loaded: { characters } }) => {
+type CharactersFromAPIProps = {
+  loaded: {
+    characters: Character[];
+  };
+};
+export const CharactersFromAPI = (
+  args,
+  { loaded: { characters } }: CharactersFromAPIProps
+) => {
   const container = createElement("div", {
     className: "container",
     childs: characters.map((character) => createCard(character)),
@@ -93,3 +129,25 @@ CharactersFromAPI.loaders = [
     characters: await getCharacters(),
   }),
 ];
+
+export const RandomCharacter = () => {
+  const randomButton = createElement("button", {
+    innerText: "Load random character",
+    onclick: async () => {
+      const randomCharacter = await getCharacter(
+        parseInt(getRandomArbitrary(1, 671))
+      );
+
+      if (container.childNodes.length > 1) {
+        container.removeChild(container.lastChild);
+      }
+      container.append(createCard(randomCharacter));
+    },
+  });
+
+  const container = createElement("div", {
+    className: "container",
+    childs: [randomButton],
+  });
+  return container;
+};
