@@ -76,6 +76,7 @@ type CharactersFromAPI = {
     characters: Character[];
   };
 };
+
 export const CharactersFromAPIWithFilter = (
   args,
   { loaded: { characters } }
